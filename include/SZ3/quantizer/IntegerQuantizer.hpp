@@ -5,6 +5,7 @@
 #include <cassert>
 #include <iostream>
 #include <vector>
+#include <fstream>
 #include "SZ3/def.hpp"
 #include "SZ3/quantizer/Quantizer.hpp"
 
@@ -13,13 +14,15 @@ namespace SZ {
     template<class T>
     class LinearQuantizer : public concepts::QuantizerInterface<T> {
     public:
-        LinearQuantizer() : error_bound(1), error_bound_reciprocal(1), radius(32768) {}
+        LinearQuantizer() : error_bound(1), error_bound_reciprocal(1), radius(32768) {
+        }
 
         LinearQuantizer(double eb, int r = 32768) : error_bound(eb),
                                                     error_bound_reciprocal(1.0 / eb),
                                                     radius(r) {
-            assert(eb != 0);
         }
+        std::vector<std::pair<T*, T>> predictions_to_save;
+        int idx = 0;
 
         int get_radius() const { return radius; }
 
@@ -29,6 +32,7 @@ namespace SZ {
             error_bound = eb;
             error_bound_reciprocal = 1.0 / eb;
         }
+        
 
         // quantize the data with a prediction value, and returns the quantization index
         int quantize(T data, T pred) {
@@ -60,6 +64,8 @@ namespace SZ {
         // int quantize(T data, T pred, T& dec_data);
         int quantize_and_overwrite(T &data, T pred) {
             T diff = data - pred;
+            this->predictions_to_save.push_back(std::make_pair(&data, pred));
+            // std::cout << predictions_to_save.size() << std::endl;
             int quant_index = (int) (fabs(diff) * this->error_bound_reciprocal) + 1;
             if (quant_index < this->radius * 2) {
                 quant_index >>= 1;
@@ -88,6 +94,8 @@ namespace SZ {
 
         int quantize_and_overwrite(T ori, T pred, T &dest) {
             T diff = ori - pred;
+
+            this->predictions_to_save.push_back(std::make_pair(&dest, pred));
             int quant_index = (int) (fabs(diff) * this->error_bound_reciprocal) + 1;
             if (quant_index < this->radius * 2) {
                 quant_index >>= 1;

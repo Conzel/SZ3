@@ -17,10 +17,13 @@ char *SZ_compress_dispatcher(SZ::Config &conf, T *data, size_t &outSize) {
 
     char *cmpData;
     if (conf.cmprAlgo == SZ::ALGO_LORENZO_REG) {
+        std::cout << "ALGO LORENZO USED" << std::endl;
         cmpData = (char *) SZ_compress_LorenzoReg<T, N>(conf, data, outSize);
     } else if (conf.cmprAlgo == SZ::ALGO_INTERP) {
+        std::cout << "ALGO INTERP USED" << std::endl;
         cmpData = (char *) SZ_compress_Interp<T, N>(conf, data, outSize);
     } else if (conf.cmprAlgo == SZ::ALGO_INTERP_LORENZO) {
+        std::cout << "ALGO INTERP LORENZO USED" << std::endl;
         cmpData = (char *) SZ_compress_Interp_lorenzo<T, N>(conf, data, outSize);
     }
     return cmpData;

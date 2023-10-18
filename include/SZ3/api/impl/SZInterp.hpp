@@ -23,11 +23,13 @@ char *SZ_compress_Interp(SZ::Config &conf, T *data, size_t &outSize) {
     assert(conf.cmprAlgo == SZ::ALGO_INTERP);
     SZ::calAbsErrorBound(conf, data);
 
+    auto quantizer = SZ::LinearQuantizer<T>(conf.absErrorBound, conf.quantbinCnt / 2);
     auto sz = SZ::SZInterpolationCompressor<T, N, SZ::LinearQuantizer<T>, SZ::HuffmanEncoder<int>, SZ::Lossless_zstd>(
-            SZ::LinearQuantizer<T>(conf.absErrorBound, conf.quantbinCnt / 2),
+            quantizer,
             SZ::HuffmanEncoder<int>(),
             SZ::Lossless_zstd());
     char *cmpData = (char *) sz.compress(conf, data, outSize);
+    sz.save_file();
     return cmpData;
 }
 
@@ -124,11 +126,13 @@ char *SZ_compress_Interp_lorenzo(SZ::Config &conf, T *data, size_t &outSize) {
     bool useInterp = !(best_lorenzo_ratio > best_interp_ratio && best_lorenzo_ratio < 80 && best_interp_ratio < 80);
 
     if (useInterp) {
+        std::cout << "ENDED UP USING INTERPOLATION." << std::endl;
         conf.cmprAlgo = SZ::ALGO_INTERP;
         double tuning_time = timer.stop();
         return SZ_compress_Interp<T, N>(conf, data, outSize);
     } else {
         //further tune lorenzo
+        std::cout << "ENDED UP USING LORENZO." << std::endl;
         if (N == 3) {
             float pred_freq, mean_freq;
             T mean_guess;
