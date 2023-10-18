@@ -35,8 +35,10 @@ namespace SZ {
             clear();
         }
 
+        Quantizer quantizer;
         void print() {};
 
+        void save_file() {};
 
         std::vector<int> compress(T *data) {
             return compress_3d(data);
@@ -589,7 +591,6 @@ namespace SZ {
         HuffmanEncoder<int> indicator_huffman;
         HuffmanEncoder<int> reg_huffman;
 
-        Quantizer quantizer;
         Config conf;
 
     };

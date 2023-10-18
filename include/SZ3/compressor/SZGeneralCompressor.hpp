@@ -27,6 +27,27 @@ namespace SZ {
                           "must implement the lossless interface");
         }
 
+        void save_file() {
+            // find absolute base address
+            auto to_save = this->frontend.quantizer.predictions_to_save;
+            std::cout << "Final size: " << to_save.size() << std::endl;
+            std::sort(to_save.begin(), to_save.end());
+            std::vector<T> data_ordered = std::vector<T>();
+
+            std::ofstream outfile;
+            outfile.open("data.bin", std::ios::out | std::ios::binary);
+
+            for (auto val: to_save) {
+                data_ordered.push_back(val.second);
+                outfile.write(reinterpret_cast<const char *>(&val.second), sizeof(T));
+                if (outfile.bad()) {
+                    std::cout << "Failed to write to file" << std::endl;
+                    exit(1);
+                }
+            }
+
+        }
+
         uchar *compress(const Config &conf, T *data, size_t &compressed_size) {
 
             std::vector<int> quant_inds = frontend.compress(data);

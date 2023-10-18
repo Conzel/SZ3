@@ -88,9 +88,11 @@ char *SZ_compress_LorenzoReg(SZ::Config &conf, T *data, size_t &outSize) {
         auto sz = SZ::make_sz_general_compressor<T, N>(SZ::make_sz_fast_frontend<T, N>(conf, quantizer), SZ::HuffmanEncoder<int>(),
                                                        SZ::Lossless_zstd());
         cmpData = (char *) sz->compress(conf, data, outSize);
+        sz->save_file();
     } else {
         auto sz = make_lorenzo_regression_compressor<T, N>(conf, quantizer, SZ::HuffmanEncoder<int>(), SZ::Lossless_zstd());
         cmpData = (char *) sz->compress(conf, data, outSize);
+        sz->save_file();
     }
     return cmpData;
 }
